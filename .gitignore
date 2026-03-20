@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (not used in this project, but prevents accidental npm installs)
+node_modules/
+npm-debug.log*
+
+# Build artifacts (none expected for static site)
+dist/
+build/
