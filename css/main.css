@@ -562,6 +562,13 @@ p + p {
   font-style: italic;
 }
 
+.team-card__photo {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  display: block;
+}
+
 .team-card__body {
   padding: var(--space-md);
 }
