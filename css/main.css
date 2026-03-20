@@ -1140,9 +1140,8 @@ p + p {
 }
 
 .gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
+  columns: 3;
+  column-gap: var(--space-sm);
 }
 
 .gallery-item {
@@ -1150,23 +1149,15 @@ p + p {
   overflow: hidden;
   position: relative;
   background-color: var(--color-stone);
-}
-
-.gallery-item--wide {
-  grid-column: span 2;
+  margin-bottom: var(--space-sm);
+  break-inside: avoid;
 }
 
 .gallery-item__img {
   width: 100%;
-  aspect-ratio: 4/3;
-  object-fit: cover;
-  object-position: center;
+  height: auto;
   display: block;
   transition: transform var(--transition-slow);
-}
-
-.gallery-item--wide .gallery-item__img {
-  aspect-ratio: 16/7;
 }
 
 .gallery-item:hover .gallery-item__img {
@@ -1550,11 +1541,7 @@ p + p {
 /* ── Phase 3 Responsive ─── */
 @media (max-width: 767px) {
   .gallery-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .gallery-item--wide {
-    grid-column: span 2;
+    columns: 2;
   }
 
   .reviews-grid {
@@ -1576,10 +1563,6 @@ p + p {
 
 @media (max-width: 479px) {
   .gallery-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .gallery-item--wide {
-    grid-column: span 1;
+    columns: 1;
   }
 }
