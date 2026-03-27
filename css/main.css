@@ -56,7 +56,7 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background-color: var(--color-cream);
+  background: linear-gradient(180deg, #1a1f2e 0%, #2a2438 60%, #1a1a2e 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -65,58 +65,110 @@
   overflow: hidden;
 }
 
-/* Hidden once played */
 .intro-overlay--hidden {
   display: none;
 }
 
-/* SVG House */
+/* Particle canvas — full overlay */
+.intro-particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Scene container */
+.intro-scene {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform, opacity;
+  /* GPU layer for smooth zoom */
+  transform: translateZ(0);
+}
+
 .intro-house {
-  width: min(70vw, 500px);
+  width: min(85vw, 700px);
   height: auto;
-  transition: opacity 0.3s ease;
+  filter: drop-shadow(0 20px 60px rgba(0,0,0,0.4));
 }
 
-.intro-house__window--lit {
-  filter: drop-shadow(0 0 12px rgba(196, 168, 130, 0.4));
+/* Glow pulse on the highlighted window */
+.intro-window-highlight {
+  animation: windowGlow 3s ease-in-out infinite;
 }
 
-/* Brand text below house */
+@keyframes windowGlow {
+  0%, 100% { stroke-opacity: 0.6; filter: drop-shadow(0 0 4px rgba(196,168,130,0.3)); }
+  50%      { stroke-opacity: 1;   filter: drop-shadow(0 0 12px rgba(196,168,130,0.6)); }
+}
+
+/* Brand text — overlaid at bottom */
 .intro-text {
+  position: absolute;
+  bottom: clamp(3rem, 8vh, 6rem);
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
-  margin-top: var(--space-md);
+  z-index: 3;
+  width: max(280px, 40vw);
+}
+
+.intro-label {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: rgba(196,168,130,0.7);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  margin-bottom: 0.6rem;
 }
 
 .intro-title {
   font-family: var(--font-serif);
   font-weight: 300;
-  font-size: var(--text-3xl);
-  color: var(--color-black);
-  letter-spacing: 0.04em;
-  margin-bottom: 0.5rem;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  color: #FAF8F5;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.intro-divider {
+  width: 50px;
+  height: 1px;
+  background: var(--color-accent);
+  margin: 0 auto 1rem;
+  opacity: 0.6;
 }
 
 .intro-prompt {
   font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  color: var(--color-warm-gray);
+  font-size: var(--text-xs);
+  color: rgba(250,248,245,0.4);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wider);
-  animation: introPromptPulse 2s ease-in-out infinite;
+  animation: introPromptPulse 2.5s ease-in-out infinite;
 }
 
 @keyframes introPromptPulse {
-  0%, 100% { opacity: 0.5; }
-  50%      { opacity: 1; }
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.8; }
 }
 
-/* Full-screen interior photo (initially hidden behind house) */
+/* Full-screen interior photo (reveals during zoom) */
 .intro-interior {
   position: absolute;
   inset: 0;
   opacity: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 4;
+  background: #1a1a1a;
 }
 
 .intro-interior img {
@@ -127,59 +179,74 @@
 
 /* ── Zoom animation states ────────────────────── */
 
-/* Phase 1: text fades out */
+/* Phase 1: text + particles fade out */
 .intro-overlay--zooming .intro-text {
+  transition: opacity 0.4s ease;
   opacity: 0;
-  transition: opacity 0.3s ease;
 }
 
-/* Phase 2: house zooms toward the lit window */
-.intro-overlay--zooming .intro-house {
-  animation: introHouseZoom 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+.intro-overlay--zooming .intro-particles {
+  transition: opacity 0.6s ease;
+  opacity: 0;
 }
 
-@keyframes introHouseZoom {
+/* Phase 2: scene zooms toward the lit window (upper-right area) */
+.intro-overlay--zooming .intro-scene {
+  animation: introSceneZoom 3.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/*
+ * transform-origin: the lit window is roughly at 65.5% from left, 50% from top of the SVG.
+ * Since the SVG is centered, this maps to roughly center of viewport horizontally,
+ * slightly above center vertically. We set origin to target the window.
+ */
+.intro-scene {
+  transform-origin: 58% 46%;
+}
+
+@keyframes introSceneZoom {
   0% {
-    transform: scale(1) translate(0, 0);
+    transform: scale(1) translateZ(0);
     opacity: 1;
   }
-  60% {
-    transform: scale(8) translate(-12%, -8%);
+  40% {
+    transform: scale(3) translateZ(0);
     opacity: 1;
   }
-  85% {
-    transform: scale(18) translate(-14%, -10%);
+  70% {
+    transform: scale(12) translateZ(0);
+    opacity: 1;
+  }
+  90% {
+    transform: scale(25) translateZ(0);
     opacity: 0;
   }
   100% {
-    transform: scale(22) translate(-14%, -10%);
+    transform: scale(30) translateZ(0);
     opacity: 0;
   }
 }
 
-/* Phase 3: interior photo fades in as house zooms past */
+/* Phase 3: interior photo fades in during zoom */
 .intro-overlay--zooming .intro-interior {
-  animation: introInteriorReveal 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: introInteriorReveal 3.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
 @keyframes introInteriorReveal {
   0%   { opacity: 0; }
-  50%  { opacity: 0; }
-  75%  { opacity: 1; }
+  55%  { opacity: 0; }
+  80%  { opacity: 1; }
   100% { opacity: 1; }
 }
 
-/* Phase 4: entire overlay fades out */
+/* Phase 4: entire overlay fades out to reveal site */
 .intro-overlay--fadeout {
-  animation: introFadeOut 0.6s ease forwards;
+  transition: opacity 0.8s ease;
+  opacity: 0;
+  pointer-events: none;
 }
 
-@keyframes introFadeOut {
-  0%   { opacity: 1; }
-  100% { opacity: 0; visibility: hidden; pointer-events: none; }
-}
-
-/* Hide main content until intro is done (prevent flash) */
+/* Hide main content until intro finishes */
 body.intro-active .site-header,
 body.intro-active #main-content,
 body.intro-active .site-footer {
@@ -190,35 +257,22 @@ body.intro-revealed .site-header,
 body.intro-revealed #main-content,
 body.intro-revealed .site-footer {
   opacity: 1;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.6s ease;
 }
 
-/* Mobile adjustments */
+/* Mobile */
 @media (max-width: 767px) {
   .intro-house {
-    width: min(90vw, 400px);
+    width: min(95vw, 500px);
   }
   .intro-title {
-    font-size: var(--text-2xl);
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
   }
-
-  @keyframes introHouseZoom {
-    0% {
-      transform: scale(1) translate(0, 0);
-      opacity: 1;
-    }
-    60% {
-      transform: scale(6) translate(-10%, -8%);
-      opacity: 1;
-    }
-    85% {
-      transform: scale(14) translate(-12%, -10%);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(18) translate(-12%, -10%);
-      opacity: 0;
-    }
+  .intro-text {
+    bottom: clamp(2rem, 5vh, 4rem);
+  }
+  .intro-scene {
+    transform-origin: 58% 48%;
   }
 }
 
