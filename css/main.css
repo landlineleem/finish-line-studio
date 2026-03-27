@@ -85,18 +85,13 @@
   inset: 0;
   z-index: 2;
   will-change: transform;
-  transform: translateZ(0);
   /*
-   * Front door center: ~50% horizontal, ~55% vertical.
-   * The radial mask + zoom both anchor here.
+   * Roof center: ~50% horizontal, ~25% vertical (top of the house).
+   * Drone descends onto the roof, mask opens from here.
    */
-  transform-origin: 50% 55%;
-  -webkit-mask-image: radial-gradient(ellipse at 50% 55%, black 100%, black 100%);
-  -webkit-mask-size: 300% 300%;
-  -webkit-mask-position: center;
-  mask-image: radial-gradient(ellipse at 50% 55%, black 100%, black 100%);
-  mask-size: 300% 300%;
-  mask-position: center;
+  transform-origin: 50% 25%;
+  /* Start slightly pulled back + shifted up to simulate elevated drone POV */
+  transform: scale(0.92) translateY(-3%) translateZ(0);
 }
 
 .intro-photo__img {
@@ -112,8 +107,8 @@
 }
 
 @keyframes introKenBurns {
-  0%   { transform: scale(1.0) translateZ(0); }
-  100% { transform: scale(1.05) translate(-0.5%, -0.3%) translateZ(0); }
+  0%   { transform: scale(0.92) translateY(-3%) translateZ(0); }
+  100% { transform: scale(0.96) translate(-0.3%, -3.5%) translateZ(0); }
 }
 
 /* ── Vignette ── */
@@ -212,7 +207,7 @@ body.intro-revealed .site-footer {
     width: 85vw;
   }
   .intro-photo {
-    transform-origin: 50% 52%;
+    transform-origin: 50% 30%;
   }
 }
 
