@@ -38,145 +38,23 @@
   <!-- ═══ INTRO OVERLAY ═══════════════════════════════════ -->
   <div class="intro-overlay" id="intro-overlay" aria-label="Welcome — click anywhere to enter">
 
-    <!-- Floating particles (ambient firefly effect) -->
-    <canvas class="intro-particles" id="intro-particles" aria-hidden="true"></canvas>
-
-    <!-- Scene container (house + ground + sky) -->
-    <div class="intro-scene" id="intro-scene">
-
-      <!-- SVG House — detailed architectural elevation, evening mood -->
-      <svg class="intro-house" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <!-- Window glow gradient -->
-          <radialGradient id="glow" cx="50%" cy="50%" r="60%">
-            <stop offset="0%" stop-color="#C4A882" stop-opacity="0.6"/>
-            <stop offset="100%" stop-color="#C4A882" stop-opacity="0"/>
-          </radialGradient>
-          <!-- Interior photo clip for main window -->
-          <clipPath id="window-main-clip">
-            <rect x="595" y="340" width="120" height="100" rx="2"/>
-          </clipPath>
-          <!-- Sky gradient -->
-          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#1a1f2e"/>
-            <stop offset="60%" stop-color="#2a2438"/>
-            <stop offset="100%" stop-color="#1a1a2e"/>
-          </linearGradient>
-        </defs>
-
-        <!-- Sky -->
-        <rect width="1000" height="700" fill="url(#sky)"/>
-
-        <!-- Stars -->
-        <circle cx="120" cy="60" r="1.2" fill="#fff" opacity="0.6"/>
-        <circle cx="280" cy="40" r="0.8" fill="#fff" opacity="0.4"/>
-        <circle cx="450" cy="80" r="1.0" fill="#fff" opacity="0.5"/>
-        <circle cx="620" cy="35" r="1.3" fill="#fff" opacity="0.7"/>
-        <circle cx="780" cy="70" r="0.9" fill="#fff" opacity="0.4"/>
-        <circle cx="900" cy="50" r="1.1" fill="#fff" opacity="0.5"/>
-        <circle cx="180" cy="110" r="0.7" fill="#fff" opacity="0.3"/>
-        <circle cx="700" cy="100" r="1.0" fill="#fff" opacity="0.6"/>
-        <circle cx="350" cy="130" r="0.8" fill="#fff" opacity="0.35"/>
-        <circle cx="850" cy="120" r="0.9" fill="#fff" opacity="0.45"/>
-
-        <!-- Ground / landscape -->
-        <rect x="0" y="560" width="1000" height="140" fill="#1a1f1a"/>
-        <ellipse cx="500" cy="560" rx="600" ry="20" fill="#222822"/>
-
-        <!-- Bushes / landscaping -->
-        <ellipse cx="220" cy="555" rx="50" ry="18" fill="#1e2a1e"/>
-        <ellipse cx="780" cy="555" rx="45" ry="16" fill="#1e2a1e"/>
-        <ellipse cx="150" cy="560" rx="35" ry="14" fill="#243024"/>
-        <ellipse cx="850" cy="558" rx="40" ry="15" fill="#243024"/>
-
-        <!-- House body -->
-        <rect x="250" y="260" width="500" height="300" fill="#2c2826" stroke="#3a3632" stroke-width="1.5"/>
-
-        <!-- Roof -->
-        <polygon points="500,140 210,265 790,265" fill="#1e1c1a" stroke="#3a3632" stroke-width="1.5"/>
-        <!-- Roof ridge detail -->
-        <line x1="500" y1="140" x2="500" y2="155" stroke="#C4A882" stroke-width="2"/>
-
-        <!-- Chimney -->
-        <rect x="620" y="155" width="35" height="85" fill="#2c2826" stroke="#3a3632" stroke-width="1"/>
-        <rect x="616" y="150" width="43" height="10" fill="#2c2826" stroke="#3a3632" stroke-width="1"/>
-
-        <!-- Front door -->
-        <rect x="460" y="400" width="80" height="160" fill="#1a1816" stroke="#3a3632" stroke-width="1.5" rx="2"/>
-        <!-- Door panels -->
-        <rect x="470" y="415" width="60" height="55" fill="none" stroke="#3a3632" stroke-width="0.8" rx="1"/>
-        <rect x="470" y="485" width="60" height="55" fill="none" stroke="#3a3632" stroke-width="0.8" rx="1"/>
-        <!-- Door handle -->
-        <circle cx="525" cy="485" r="4" fill="#C4A882"/>
-        <!-- Door transom / arch -->
-        <path d="M460,400 Q500,370 540,400" fill="#1a1816" stroke="#3a3632" stroke-width="1"/>
-        <!-- Door light spill -->
-        <rect x="462" y="555" width="76" height="8" fill="#C4A882" opacity="0.08" rx="2"/>
-
-        <!-- Front steps -->
-        <rect x="445" y="560" width="110" height="10" fill="#2a2826" stroke="#3a3632" stroke-width="0.8"/>
-        <rect x="435" y="570" width="130" height="10" fill="#2a2826" stroke="#3a3632" stroke-width="0.8"/>
-        <rect x="425" y="580" width="150" height="10" fill="#2a2826" stroke="#3a3632" stroke-width="0.8"/>
-
-        <!-- ═══ WINDOWS ═══ -->
-
-        <!-- Window glow halos (behind windows) -->
-        <rect x="280" y="300" width="120" height="100" fill="url(#glow)" opacity="0.5"/>
-        <rect x="595" y="300" width="120" height="100" fill="url(#glow)" opacity="0.7"/>
-        <rect x="300" y="430" width="90" height="70" fill="url(#glow)" opacity="0.3"/>
-        <rect x="615" y="430" width="90" height="70" fill="url(#glow)" opacity="0.3"/>
-
-        <!-- Upper-left window -->
-        <rect x="290" y="310" width="100" height="85" fill="#3d3020" rx="2"/>
-        <rect x="290" y="310" width="100" height="85" fill="#C4A882" opacity="0.15" rx="2"/>
-        <rect x="290" y="310" width="100" height="85" fill="none" stroke="#4a4440" stroke-width="1.5" rx="2"/>
-        <line x1="340" y1="310" x2="340" y2="395" stroke="#4a4440" stroke-width="1"/>
-        <line x1="290" y1="352" x2="390" y2="352" stroke="#4a4440" stroke-width="1"/>
-        <!-- Shutters -->
-        <rect x="272" y="306" width="16" height="93" fill="#1e1c1a" stroke="#3a3632" stroke-width="0.8" rx="1"/>
-        <rect x="392" y="306" width="16" height="93" fill="#1e1c1a" stroke="#3a3632" stroke-width="0.8" rx="1"/>
-
-        <!-- Upper-right window — THE MAIN WINDOW (shows interior) -->
-        <image href="images/gallery/services-hero.jpg" x="595" y="340" width="150" height="100"
-               clip-path="url(#window-main-clip)" preserveAspectRatio="xMidYMid slice" opacity="0.85"/>
-        <rect x="605" y="310" width="100" height="85" fill="#C4A882" opacity="0.12" rx="2"/>
-        <rect x="605" y="310" width="100" height="85" fill="none" stroke="#C4A882" stroke-width="2" rx="2" class="intro-window-highlight"/>
-        <line x1="655" y1="310" x2="655" y2="395" stroke="#C4A882" stroke-width="0.8" opacity="0.4"/>
-        <line x1="605" y1="352" x2="705" y2="352" stroke="#C4A882" stroke-width="0.8" opacity="0.4"/>
-        <!-- Shutters -->
-        <rect x="587" y="306" width="16" height="93" fill="#1e1c1a" stroke="#3a3632" stroke-width="0.8" rx="1"/>
-        <rect x="707" y="306" width="16" height="93" fill="#1e1c1a" stroke="#3a3632" stroke-width="0.8" rx="1"/>
-
-        <!-- Lower-left small window -->
-        <rect x="310" y="440" width="70" height="60" fill="#3d3020" rx="1"/>
-        <rect x="310" y="440" width="70" height="60" fill="#C4A882" opacity="0.1" rx="1"/>
-        <rect x="310" y="440" width="70" height="60" fill="none" stroke="#4a4440" stroke-width="1" rx="1"/>
-        <line x1="345" y1="440" x2="345" y2="500" stroke="#4a4440" stroke-width="0.8"/>
-
-        <!-- Lower-right small window -->
-        <rect x="620" y="440" width="70" height="60" fill="#3d3020" rx="1"/>
-        <rect x="620" y="440" width="70" height="60" fill="#C4A882" opacity="0.1" rx="1"/>
-        <rect x="620" y="440" width="70" height="60" fill="none" stroke="#4a4440" stroke-width="1" rx="1"/>
-        <line x1="655" y1="440" x2="655" y2="500" stroke="#4a4440" stroke-width="0.8"/>
-
-        <!-- Window sills -->
-        <rect x="286" y="395" width="112" height="5" fill="#2a2826"/>
-        <rect x="601" y="395" width="112" height="5" fill="#2a2826"/>
-
-        <!-- Pathway -->
-        <path d="M500,590 Q500,620 480,700 L520,700 Q500,620 500,590" fill="#2a2826" opacity="0.5"/>
-      </svg>
+    <!-- Mansion photo — zooms into window on click -->
+    <div class="intro-photo" id="intro-photo">
+      <img src="images/hero/mansion.jpg" alt="" aria-hidden="true" class="intro-photo__img">
     </div>
 
-    <!-- Brand + Prompt (overlaid on scene) -->
-    <div class="intro-text">
+    <!-- Subtle dark vignette over photo -->
+    <div class="intro-vignette"></div>
+
+    <!-- Brand + Prompt -->
+    <div class="intro-text" id="intro-text">
       <p class="intro-label">Interior Design Installation Support</p>
       <h1 class="intro-title">Finish Line Studio</h1>
       <div class="intro-divider"></div>
       <p class="intro-prompt">click anywhere to enter</p>
     </div>
 
-    <!-- Full-screen interior image (reveals during zoom) -->
+    <!-- Interior photo — fades in as we "pass through" the window -->
     <div class="intro-interior" id="intro-interior">
       <img src="images/gallery/services-hero.jpg" alt="" aria-hidden="true">
     </div>
