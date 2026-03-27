@@ -65,14 +65,38 @@
   display: none;
 }
 
-/* ── Layer 1: Mansion photo ── */
-.intro-photo {
+/* ── Back layer: Living room (destination) ── */
+.intro-room {
   position: absolute;
   inset: 0;
   z-index: 1;
+  pointer-events: none;
+}
+
+.intro-room img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Front layer: Mansion photo ── */
+.intro-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   will-change: transform;
   transform: translateZ(0);
+  /*
+   * Front door center: ~50% horizontal, ~55% vertical.
+   * The radial mask + zoom both anchor here.
+   */
   transform-origin: 50% 55%;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 55%, black 100%, black 100%);
+  -webkit-mask-size: 300% 300%;
+  -webkit-mask-position: center;
+  mask-image: radial-gradient(ellipse at 50% 55%, black 100%, black 100%);
+  mask-size: 300% 300%;
+  mask-position: center;
 }
 
 .intro-photo__img {
@@ -82,6 +106,7 @@
   display: block;
 }
 
+/* Ken Burns idle drift */
 .intro-photo--idle {
   animation: introKenBurns 20s ease-in-out infinite alternate;
 }
@@ -91,125 +116,26 @@
   100% { transform: scale(1.05) translate(-0.5%, -0.3%) translateZ(0); }
 }
 
-/* ── Layer 2: 3D Door ── */
-.intro-door-perspective {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  perspective: 1200px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.intro-door-frame {
-  position: relative;
-  width: 18vw;
-  max-width: 200px;
-  height: 52vh;
-  max-height: 520px;
-  background: #2a2520;
-  border: 3px solid #3a3530;
-  border-radius: 2px 2px 0 0;
-  overflow: hidden;
-  /* 3D context for the swinging door inside */
-  transform-style: preserve-3d;
-}
-
-.intro-door {
-  position: absolute;
-  inset: 0;
-  background: #1c1a18;
-  /* Hinge on the left side */
-  transform-origin: left center;
-  transform: rotateY(0deg);
-  transition: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 12px;
-  padding: 20px 15%;
-  backface-visibility: hidden;
-}
-
-/* Horizontal frosted glass panels (5 strips matching the real door) */
-.intro-door__panel {
-  height: 12%;
-  background: rgba(180, 200, 210, 0.12);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 1px;
-}
-
-/* Door handle — right side */
-.intro-door__handle {
-  position: absolute;
-  right: 16%;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 28px;
-  background: #C4A882;
-  border-radius: 3px;
-  box-shadow: 0 0 6px rgba(196,168,130,0.3);
-}
-
-/* ── Layer 3: Dark foyer ── */
-.intro-foyer {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  background: radial-gradient(ellipse at 50% 40%, #1a1815 0%, #0a0908 100%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* ── Layer 4: Grand living room ── */
-.intro-room {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  opacity: 0;
-  pointer-events: none;
-  background: #0a0a0a;
-}
-
-.intro-room img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Slight scale — will animate to 1 for "arriving" feel */
-  transform: scale(1.15);
-  transition: transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.intro-room--arrived img {
-  transform: scale(1);
-}
-
-/* ── Vignette + text ── */
+/* ── Vignette ── */
 .intro-vignette {
   position: absolute;
   inset: 0;
-  z-index: 6;
+  z-index: 3;
   background:
     radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.4) 100%),
     linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 40%);
   pointer-events: none;
-  transition: opacity 0.5s ease;
 }
 
+/* ── Brand text ── */
 .intro-text {
   position: absolute;
   bottom: clamp(3rem, 8vh, 6rem);
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  z-index: 7;
+  z-index: 4;
   width: max(280px, 40vw);
-  transition: opacity 0.5s ease;
 }
 
 .intro-label {
@@ -256,113 +182,13 @@
   50%      { opacity: 0.85; }
 }
 
-/* ═══ ANIMATION STATES ═══════════════════════════ */
-
-/* ── Phase 1: Text + vignette fade out ── */
-.intro-overlay--zooming .intro-text,
-.intro-overlay--zooming .intro-vignette {
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-
-/* ── Phase 2: Mansion zooms toward front door ── */
-.intro-overlay--zooming .intro-photo {
-  animation: introApproach 5s cubic-bezier(0.12, 0.7, 0.3, 1) forwards;
-}
-
-@keyframes introApproach {
-  0% {
-    transform: scale(1) translateZ(0);
-    opacity: 1;
-  }
-  /* Slow approach */
-  25% {
-    transform: scale(2) translateZ(0);
-    opacity: 1;
-  }
-  /* Door is large in frame — door overlay takes over */
-  45% {
-    transform: scale(4.5) translateZ(0);
-    opacity: 1;
-  }
-  /* Fade out mansion as we enter the doorway */
-  60% {
-    transform: scale(8) translateZ(0);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(12) translateZ(0);
-    opacity: 0;
-  }
-}
-
-/* ── Phase 3: Door appears and swings open ── */
-.intro-overlay--door-visible .intro-door-perspective {
-  opacity: 1;
-}
-
-.intro-overlay--door-open .intro-door {
-  animation: doorSwing 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes doorSwing {
-  0%   { transform: rotateY(0deg); }
-  30%  { transform: rotateY(-35deg); }
-  100% { transform: rotateY(-105deg); }
-}
-
-/* Door frame scales up as we "walk through" it */
-.intro-overlay--door-enter .intro-door-frame {
-  animation: doorFrameZoom 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes doorFrameZoom {
-  0%   { transform: scale(1) translateZ(0); }
-  100% { transform: scale(8) translateZ(0); }
-}
-
-/* Door perspective container fades as we pass through */
-.intro-overlay--door-enter .intro-door-perspective {
-  animation: doorFadeThrough 2s ease forwards;
-}
-
-@keyframes doorFadeThrough {
-  0%   { opacity: 1; }
-  70%  { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* ── Phase 4: Foyer darkness ── */
-.intro-overlay--foyer .intro-foyer {
-  animation: foyerReveal 2.5s ease forwards;
-}
-
-@keyframes foyerReveal {
-  0%   { opacity: 0; }
-  20%  { opacity: 1; }
-  80%  { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* ── Phase 5: Living room arrival ── */
-.intro-overlay--room .intro-room {
-  animation: roomReveal 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes roomReveal {
-  0%   { opacity: 0; }
-  30%  { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-/* ── Phase 6: Final fade to site ── */
+/* ── Final fade to site ── */
 .intro-overlay--fadeout {
   transition: opacity 0.8s ease;
   opacity: 0 !important;
   pointer-events: none;
 }
 
-/* Hide main content behind intro */
 body.intro-active .site-header,
 body.intro-active #main-content,
 body.intro-active .site-footer {
@@ -387,10 +213,6 @@ body.intro-revealed .site-footer {
   }
   .intro-photo {
     transform-origin: 50% 52%;
-  }
-  .intro-door-frame {
-    width: 28vw;
-    height: 45vh;
   }
 }
 

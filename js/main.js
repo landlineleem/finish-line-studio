@@ -1,7 +1,7 @@
 /**
  * Finish Line Studio — Global JavaScript
- * Handles: Intro overlay (mansion zoom, 3D door, room walkthrough, smooth jazz),
- *          AOS scroll animations, mobile nav toggle
+ * Handles: Intro overlay (smooth rAF-driven zoom + door mask + room reveal),
+ *          smooth jazz soundtrack, AOS scroll animations, mobile nav toggle
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,62 +15,113 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       document.body.classList.add('intro-active');
 
-      const introPhoto = document.getElementById('intro-photo');
-      if (introPhoto) introPhoto.classList.add('intro-photo--idle');
+      const photo     = document.getElementById('intro-photo');
+      const room      = document.getElementById('intro-room');
+      const text      = document.getElementById('intro-text');
+      const vignette  = document.getElementById('intro-vignette');
+
+      if (photo) photo.classList.add('intro-photo--idle');
 
       introOverlay.addEventListener('click', () => {
         if (introOverlay.dataset.triggered) return;
         introOverlay.dataset.triggered = 'true';
 
         // Stop idle drift
-        if (introPhoto) {
-          introPhoto.classList.remove('intro-photo--idle');
-          void introPhoto.offsetHeight;
+        if (photo) {
+          photo.classList.remove('intro-photo--idle');
+          photo.style.transform = 'scale(1) translateZ(0)';
         }
 
         // Start smooth jazz
         const stopJazz = playSmoothJazz();
 
-        // ── Phase 1 (0ms): Start zoom toward house ──
-        introOverlay.classList.add('intro-overlay--zooming');
+        // ── Single rAF-driven animation ──
+        const duration = 5500; // total ms
+        const start = performance.now();
 
-        // ── Phase 2 (1200ms): Door fades in over the zooming photo ──
-        setTimeout(() => {
-          introOverlay.classList.add('intro-overlay--door-visible');
-        }, 1200);
+        function tick(now) {
+          const elapsed = now - start;
+          const t = Math.min(elapsed / duration, 1);
 
-        // ── Phase 3 (1600ms): Door swings open ──
-        setTimeout(() => {
-          introOverlay.classList.add('intro-overlay--door-open');
-        }, 1600);
+          // Easing: custom bezier-like (slow start, smooth acceleration, gentle end)
+          const ease = t < 0.4
+            ? 2.5 * t * t                           // slow approach
+            : t < 0.75
+              ? 0.4 + (t - 0.4) * 2.0               // accelerate through door
+              : 0.4 + 0.7 + (t - 0.75) * 1.2;       // settle into room
+          const p = Math.min(ease / (0.4 + 0.7 + 0.25 * 1.2), 1); // normalize to 0-1
 
-        // ── Phase 4 (2200ms): Foyer darkness + walk through door frame ──
-        setTimeout(() => {
-          introOverlay.classList.add('intro-overlay--foyer');
-          introOverlay.classList.add('intro-overlay--door-enter');
-        }, 2200);
+          // ── Mansion zoom (continuous, toward front door) ──
+          const scale = 1 + p * 25;
+          if (photo) {
+            photo.style.transform = `scale(${scale}) translateZ(0)`;
+          }
 
-        // ── Phase 5 (3200ms): Living room fades in ──
-        setTimeout(() => {
-          introOverlay.classList.add('intro-overlay--room');
-          // Trigger the "arriving" scale-down on the room image
-          const room = document.getElementById('intro-room');
-          if (room) room.classList.add('intro-room--arrived');
-        }, 3200);
+          // ── Text + vignette fade (0% → 10% of progress) ──
+          const textFade = 1 - Math.min(t / 0.1, 1);
+          if (text)     text.style.opacity = textFade;
+          if (vignette) vignette.style.opacity = textFade;
 
-        // ── Phase 6 (5000ms): Fade out overlay, reveal site ──
-        setTimeout(() => {
-          introOverlay.classList.add('intro-overlay--fadeout');
-          document.body.classList.remove('intro-active');
-          document.body.classList.add('intro-revealed');
-        }, 5000);
+          // ── Door opening mask ──
+          // Between 25%-55% progress: a radial mask opens from the door center.
+          // The transparent hole grows from 0% to fill the entire viewport,
+          // making the mansion "open up" at the door to reveal what's behind.
+          if (photo) {
+            if (t < 0.25) {
+              // No mask yet — mansion fully visible
+              photo.style.webkitMaskImage = 'none';
+              photo.style.maskImage = 'none';
+            } else if (t < 0.6) {
+              // Door opens: transparent center grows
+              const maskT = (t - 0.25) / 0.35; // 0→1 over this range
+              const holeSize = maskT * 55; // transparent hole radius %
+              const edgeSize = holeSize + 8; // soft edge
+              const mask = `radial-gradient(ellipse at 50% 55%, transparent ${holeSize}%, rgba(0,0,0,0.3) ${holeSize + 3}%, black ${edgeSize}%)`;
+              photo.style.webkitMaskImage = mask;
+              photo.style.maskImage = mask;
+            } else {
+              // Mansion fully transparent — we're inside
+              photo.style.webkitMaskImage = 'radial-gradient(ellipse at 50% 55%, transparent 100%, transparent 100%)';
+              photo.style.maskImage = 'radial-gradient(ellipse at 50% 55%, transparent 100%, transparent 100%)';
+            }
+          }
 
-        // ── Cleanup (5900ms): Remove overlay, save session, fade music ──
-        setTimeout(() => {
-          introOverlay.classList.add('intro-overlay--hidden');
-          sessionStorage.setItem('introPlayed', 'true');
-          if (stopJazz) stopJazz();
-        }, 5900);
+          // ── Room reveal ──
+          // Room starts becoming visible as the mask opens (30%),
+          // with a slight forward-motion scale that settles to 1.
+          if (room) {
+            if (t < 0.3) {
+              room.style.opacity = 0;
+              room.style.transform = 'scale(1.2) translateZ(0)';
+            } else if (t < 0.7) {
+              const roomT = (t - 0.3) / 0.4;
+              room.style.opacity = roomT;
+              const roomScale = 1.2 - roomT * 0.2;
+              room.style.transform = `scale(${roomScale}) translateZ(0)`;
+            } else {
+              room.style.opacity = 1;
+              room.style.transform = 'scale(1) translateZ(0)';
+            }
+          }
+
+          // ── Continue or finish ──
+          if (t < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            // Fade out overlay, reveal site
+            introOverlay.classList.add('intro-overlay--fadeout');
+            document.body.classList.remove('intro-active');
+            document.body.classList.add('intro-revealed');
+
+            setTimeout(() => {
+              introOverlay.classList.add('intro-overlay--hidden');
+              sessionStorage.setItem('introPlayed', 'true');
+              if (stopJazz) stopJazz();
+            }, 900);
+          }
+        }
+
+        requestAnimationFrame(tick);
       });
     }
   }
@@ -105,15 +156,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const now = ctx.currentTime;
 
-      // ── Rhodes chords ──
+      // Rhodes chords
       const chords = [
-        [261.63, 329.63, 392.00, 493.88, 587.33],  // Cmaj9
-        [220.00, 261.63, 329.63, 392.00, 493.88],  // Am9
-        [293.66, 349.23, 440.00, 523.25, 659.25],  // Dm9
-        [196.00, 246.94, 293.66, 349.23, 440.00],  // G13
+        [261.63, 329.63, 392.00, 493.88, 587.33],
+        [220.00, 261.63, 329.63, 392.00, 493.88],
+        [293.66, 349.23, 440.00, 523.25, 659.25],
+        [196.00, 246.94, 293.66, 349.23, 440.00],
       ];
       const beatDur = 2.2;
-
       chords.forEach((chord, ci) => {
         const t0 = now + ci * beatDur;
         chord.forEach((freq, ni) => {
@@ -136,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      // ── Walking bass ──
+      // Walking bass
       const bass = [
         [130.81,0,0.5],[146.83,0.55,0.4],[164.81,1.1,0.5],[174.61,1.65,0.4],
         [110.00,2.2,0.5],[123.47,2.75,0.4],[130.81,3.3,0.5],[146.83,3.85,0.4],
@@ -158,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(t); osc.stop(t + dur + 0.2);
       });
 
-      // ── Melody ──
+      // Melody
       const melody = [
         [784.00,1.0,0.8,0.035],[698.46,2.0,0.5,0.025],
         [659.25,2.8,1.0,0.035],[587.33,5.0,0.7,0.03],
@@ -183,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(t); osc.stop(t + dur + 0.1);
       });
 
-      // ── Brushed hi-hat ──
+      // Brushed hi-hat
       const swing = 0.12;
       for (let b = 0; b < 20; b++) {
         const t = now + b * 0.55;
@@ -204,34 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         src.connect(hp); hp.connect(g); g.connect(dest);
         src.start(time);
       }
-
-      // ── Door creak sound (subtle) ──
-      // Triggered at 1.6s when door opens
-      setTimeout(() => {
-        const creakDur = 1.2;
-        const t = ctx.currentTime;
-        // Low creak — frequency-modulated sine
-        const osc = ctx.createOscillator();
-        const lfo = ctx.createOscillator();
-        const lfoGain = ctx.createGain();
-        const g = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = 120;
-        lfo.type = 'sine';
-        lfo.frequency.value = 3;
-        lfoGain.gain.value = 40;
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc.frequency);
-        g.gain.setValueAtTime(0, t);
-        g.gain.linearRampToValueAtTime(0.015, t + 0.1);
-        g.gain.exponentialRampToValueAtTime(0.001, t + creakDur);
-        osc.connect(g);
-        g.connect(master);
-        osc.start(t);
-        osc.stop(t + creakDur);
-        lfo.start(t);
-        lfo.stop(t + creakDur);
-      }, 1600);
 
       return () => {
         master.gain.linearRampToValueAtTime(0, ctx.currentTime + 2);
@@ -267,7 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Close nav on outside click ─────────────────────────────
   document.addEventListener('click', (e) => {
     if (siteNav && menuToggle &&
         !siteNav.contains(e.target) &&

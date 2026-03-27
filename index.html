@@ -38,39 +38,18 @@
   <!-- ═══ INTRO OVERLAY ═══════════════════════════════════ -->
   <div class="intro-overlay" id="intro-overlay" aria-label="Welcome — click anywhere to enter">
 
-    <!-- Layer 1: Mansion photo — zooms toward front door -->
-    <div class="intro-photo" id="intro-photo">
-      <img src="images/hero/mansion-hq.jpg" alt="" aria-hidden="true" class="intro-photo__img">
-    </div>
-
-    <!-- Layer 2: 3D Door — swings open mid-zoom -->
-    <div class="intro-door-perspective" aria-hidden="true">
-      <!-- Door frame -->
-      <div class="intro-door-frame">
-        <!-- The swinging door panel -->
-        <div class="intro-door" id="intro-door">
-          <!-- Horizontal glass panels (matching the real door) -->
-          <div class="intro-door__panel"></div>
-          <div class="intro-door__panel"></div>
-          <div class="intro-door__panel"></div>
-          <div class="intro-door__panel"></div>
-          <div class="intro-door__panel"></div>
-          <!-- Door handle -->
-          <div class="intro-door__handle"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Layer 3: Dark foyer (visible behind open door, transitions to room) -->
-    <div class="intro-foyer" id="intro-foyer"></div>
-
-    <!-- Layer 4: Grand living room — final destination -->
+    <!-- Back layer: Grand living room (destination — revealed through door opening) -->
     <div class="intro-room" id="intro-room">
       <img src="images/gallery/jillian-01.jpg" alt="" aria-hidden="true">
     </div>
 
+    <!-- Front layer: Mansion photo (zooms in, door mask opens to reveal room) -->
+    <div class="intro-photo" id="intro-photo">
+      <img src="images/hero/mansion-hq.jpg" alt="" aria-hidden="true" class="intro-photo__img">
+    </div>
+
     <!-- Vignette overlay for text contrast -->
-    <div class="intro-vignette"></div>
+    <div class="intro-vignette" id="intro-vignette"></div>
 
     <!-- Brand + Prompt -->
     <div class="intro-text" id="intro-text">
