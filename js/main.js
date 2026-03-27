@@ -43,14 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
           introOverlay.classList.add('intro-overlay--fadeout');
           document.body.classList.remove('intro-active');
           document.body.classList.add('intro-revealed');
-        }, 3600);
+        }, 3800);
 
         // Final cleanup
         setTimeout(() => {
           introOverlay.classList.add('intro-overlay--hidden');
           sessionStorage.setItem('introPlayed', 'true');
           if (stopJazz) stopJazz();
-        }, 4500);
+        }, 4700);
       });
     }
   }
