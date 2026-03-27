@@ -35,6 +35,56 @@
 </head>
 <body class="page-home">
 
+  <!-- ═══ INTRO OVERLAY ═══════════════════════════════════ -->
+  <div class="intro-overlay" id="intro-overlay" aria-label="Welcome — click anywhere to enter">
+
+    <!-- SVG House Facade -->
+    <svg class="intro-house" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- Roof -->
+      <polygon class="intro-house__roof" points="400,80 120,260 680,260" stroke="#1A1A1A" stroke-width="2.5" fill="none"/>
+      <!-- Chimney -->
+      <rect class="intro-house__chimney" x="560" y="120" width="40" height="100" stroke="#1A1A1A" stroke-width="2" fill="none"/>
+      <!-- Walls -->
+      <rect class="intro-house__walls" x="160" y="260" width="480" height="280" stroke="#1A1A1A" stroke-width="2.5" fill="none"/>
+      <!-- Door -->
+      <rect class="intro-house__door" x="355" y="380" width="90" height="160" stroke="#1A1A1A" stroke-width="2" fill="none"/>
+      <circle class="intro-house__doorknob" cx="430" cy="465" r="5" fill="#C4A882"/>
+      <!-- Door transom arc -->
+      <path class="intro-house__door-arc" d="M355,380 Q400,350 445,380" stroke="#1A1A1A" stroke-width="1.5" fill="none"/>
+      <!-- Window LEFT (decorative) -->
+      <rect class="intro-house__window" x="210" y="320" width="100" height="80" stroke="#1A1A1A" stroke-width="2" fill="none"/>
+      <line x1="260" y1="320" x2="260" y2="400" stroke="#1A1A1A" stroke-width="1.2"/>
+      <line x1="210" y1="360" x2="310" y2="360" stroke="#1A1A1A" stroke-width="1.2"/>
+      <!-- Window RIGHT — the "lit" window with interior photo -->
+      <defs>
+        <clipPath id="window-clip">
+          <rect x="490" y="320" width="100" height="80" rx="0"/>
+        </clipPath>
+      </defs>
+      <image href="images/gallery/services-hero.jpg" x="465" y="300" width="150" height="120"
+             clip-path="url(#window-clip)" preserveAspectRatio="xMidYMid slice"/>
+      <rect class="intro-house__window intro-house__window--lit" x="490" y="320" width="100" height="80" stroke="#C4A882" stroke-width="2.5" fill="none"/>
+      <line x1="540" y1="320" x2="540" y2="400" stroke="#C4A882" stroke-width="1.2" opacity="0.5"/>
+      <line x1="490" y1="360" x2="590" y2="360" stroke="#C4A882" stroke-width="1.2" opacity="0.5"/>
+      <!-- Warm glow around lit window -->
+      <rect x="485" y="315" width="110" height="90" rx="2" fill="none" stroke="#C4A882" stroke-width="1" opacity="0.3"/>
+      <!-- Steps -->
+      <rect x="340" y="540" width="120" height="12" stroke="#1A1A1A" stroke-width="1.5" fill="none"/>
+      <rect x="330" y="552" width="140" height="10" stroke="#1A1A1A" stroke-width="1.5" fill="none"/>
+    </svg>
+
+    <!-- Brand + Prompt -->
+    <div class="intro-text">
+      <h1 class="intro-title">Finish Line Studio</h1>
+      <p class="intro-prompt">click anywhere to enter</p>
+    </div>
+
+    <!-- Full-screen interior image (hidden, scales up during zoom) -->
+    <div class="intro-interior" id="intro-interior">
+      <img src="images/gallery/services-hero.jpg" alt="" aria-hidden="true">
+    </div>
+  </div>
+
   <header class="site-header">
     <div class="container site-header__inner">
       <a href="index.html" class="site-logo" aria-label="Finish Line Studio — home">
