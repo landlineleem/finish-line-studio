@@ -38,12 +38,38 @@
   <!-- ═══ INTRO OVERLAY ═══════════════════════════════════ -->
   <div class="intro-overlay" id="intro-overlay" aria-label="Welcome — click anywhere to enter">
 
-    <!-- Mansion photo — zooms into window on click -->
+    <!-- Layer 1: Mansion photo — zooms toward front door -->
     <div class="intro-photo" id="intro-photo">
       <img src="images/hero/mansion-hq.jpg" alt="" aria-hidden="true" class="intro-photo__img">
     </div>
 
-    <!-- Subtle dark vignette over photo -->
+    <!-- Layer 2: 3D Door — swings open mid-zoom -->
+    <div class="intro-door-perspective" aria-hidden="true">
+      <!-- Door frame -->
+      <div class="intro-door-frame">
+        <!-- The swinging door panel -->
+        <div class="intro-door" id="intro-door">
+          <!-- Horizontal glass panels (matching the real door) -->
+          <div class="intro-door__panel"></div>
+          <div class="intro-door__panel"></div>
+          <div class="intro-door__panel"></div>
+          <div class="intro-door__panel"></div>
+          <div class="intro-door__panel"></div>
+          <!-- Door handle -->
+          <div class="intro-door__handle"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 3: Dark foyer (visible behind open door, transitions to room) -->
+    <div class="intro-foyer" id="intro-foyer"></div>
+
+    <!-- Layer 4: Grand living room — final destination -->
+    <div class="intro-room" id="intro-room">
+      <img src="images/gallery/jillian-01.jpg" alt="" aria-hidden="true">
+    </div>
+
+    <!-- Vignette overlay for text contrast -->
     <div class="intro-vignette"></div>
 
     <!-- Brand + Prompt -->
@@ -52,11 +78,6 @@
       <h1 class="intro-title">Finish Line Studio</h1>
       <div class="intro-divider"></div>
       <p class="intro-prompt">click anywhere to enter</p>
-    </div>
-
-    <!-- Interior photo — fades in as we "pass through" the window -->
-    <div class="intro-interior" id="intro-interior">
-      <img src="images/gallery/services-hero.jpg" alt="" aria-hidden="true">
     </div>
   </div>
 
