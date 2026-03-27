@@ -1,6 +1,6 @@
 /**
  * Finish Line Studio — Global JavaScript
- * Handles: Intro overlay (drone descent onto roof, radial mask reveal into living room),
+ * Handles: Intro overlay (smooth rAF-driven zoom + door mask + room reveal),
  *          smooth jazz soundtrack, AOS scroll animations, mobile nav toggle
  */
 
@@ -26,76 +26,77 @@ document.addEventListener('DOMContentLoaded', () => {
         if (introOverlay.dataset.triggered) return;
         introOverlay.dataset.triggered = 'true';
 
-        // Stop idle drift, set starting position
+        // Stop idle drift
         if (photo) {
           photo.classList.remove('intro-photo--idle');
-          photo.style.transform = 'scale(0.92) translateY(-3%) translateZ(0)';
+          photo.style.transform = 'scale(1) translateZ(0)';
         }
 
+        // Start smooth jazz
         const stopJazz = playSmoothJazz();
 
         // ── Single rAF-driven animation ──
-        // Drone descends from elevated view → onto roof → through roof → into living room
-        const duration = 5500;
+        const duration = 5500; // total ms
         const start = performance.now();
 
         function tick(now) {
           const elapsed = now - start;
           const t = Math.min(elapsed / duration, 1);
 
-          // Smooth easing (slow start, smooth middle, gentle landing)
-          const ease = cubicBezier(t, 0.25, 0.1, 0.25, 1.0);
+          // Easing: custom bezier-like (slow start, smooth acceleration, gentle end)
+          const ease = t < 0.4
+            ? 2.5 * t * t                           // slow approach
+            : t < 0.75
+              ? 0.4 + (t - 0.4) * 2.0               // accelerate through door
+              : 0.4 + 0.7 + (t - 0.75) * 1.2;       // settle into room
+          const p = Math.min(ease / (0.4 + 0.7 + 0.25 * 1.2), 1); // normalize to 0-1
 
-          // ── Text + vignette fade (first 12%) ──
-          const textFade = 1 - Math.min(t / 0.12, 1);
+          // ── Mansion zoom (continuous, toward front door) ──
+          const scale = 1 + p * 25;
+          if (photo) {
+            photo.style.transform = `scale(${scale}) translateZ(0)`;
+          }
+
+          // ── Text + vignette fade (0% → 10% of progress) ──
+          const textFade = 1 - Math.min(t / 0.1, 1);
           if (text)     text.style.opacity = textFade;
           if (vignette) vignette.style.opacity = textFade;
 
-          // ── Drone descent: start pulled back (0.92), descend onto roof ──
-          // Scale goes from 0.92 → ~20 (zooming into the roof)
-          // translateY goes from -3% → +2% (simulating downward tilt/descent)
-          const scale = 0.92 + ease * 22;
-          const translateY = -3 + ease * 5;
-
+          // ── Door opening mask ──
+          // Between 25%-55% progress: a radial mask opens from the door center.
+          // The transparent hole grows from 0% to fill the entire viewport,
+          // making the mansion "open up" at the door to reveal what's behind.
           if (photo) {
-            photo.style.transform = `scale(${scale}) translateY(${translateY}%) translateZ(0)`;
-          }
-
-          // ── Roof mask opening ──
-          // Between 30%–65%: radial mask opens from the roof center,
-          // as if the drone is descending through the roof into the room below
-          if (photo) {
-            if (t < 0.30) {
-              // No mask — full mansion visible
+            if (t < 0.25) {
+              // No mask yet — mansion fully visible
               photo.style.webkitMaskImage = 'none';
               photo.style.maskImage = 'none';
-            } else if (t < 0.65) {
-              const maskT = (t - 0.30) / 0.35; // 0→1
-              // Smooth mask opening with soft edges
-              const hole = maskT * 60;
-              const edge = hole + 6 + (1 - maskT) * 8; // wider soft edge at start
-              const mask = `radial-gradient(ellipse at 50% 25%, transparent ${hole}%, rgba(0,0,0,0.2) ${hole + 2}%, black ${edge}%)`;
+            } else if (t < 0.6) {
+              // Door opens: transparent center grows
+              const maskT = (t - 0.25) / 0.35; // 0→1 over this range
+              const holeSize = maskT * 55; // transparent hole radius %
+              const edgeSize = holeSize + 8; // soft edge
+              const mask = `radial-gradient(ellipse at 50% 55%, transparent ${holeSize}%, rgba(0,0,0,0.3) ${holeSize + 3}%, black ${edgeSize}%)`;
               photo.style.webkitMaskImage = mask;
               photo.style.maskImage = mask;
             } else {
-              // Fully through — mansion gone
-              photo.style.webkitMaskImage = 'radial-gradient(ellipse at 50% 25%, transparent 100%, transparent 100%)';
-              photo.style.maskImage = 'radial-gradient(ellipse at 50% 25%, transparent 100%, transparent 100%)';
+              // Mansion fully transparent — we're inside
+              photo.style.webkitMaskImage = 'radial-gradient(ellipse at 50% 55%, transparent 100%, transparent 100%)';
+              photo.style.maskImage = 'radial-gradient(ellipse at 50% 55%, transparent 100%, transparent 100%)';
             }
           }
 
-          // ── Living room reveal ──
-          // Starts fading in at 25%, with a descending scale (1.25→1.0)
-          // to simulate the drone settling into the room from above
+          // ── Room reveal ──
+          // Room starts becoming visible as the mask opens (30%),
+          // with a slight forward-motion scale that settles to 1.
           if (room) {
-            if (t < 0.25) {
+            if (t < 0.3) {
               room.style.opacity = 0;
-              room.style.transform = 'scale(1.25) translateZ(0)';
-            } else if (t < 0.75) {
-              const roomT = (t - 0.25) / 0.5;
-              const roomEase = roomT * roomT * (3 - 2 * roomT); // smoothstep
-              room.style.opacity = roomEase;
-              const roomScale = 1.25 - roomEase * 0.25;
+              room.style.transform = 'scale(1.2) translateZ(0)';
+            } else if (t < 0.7) {
+              const roomT = (t - 0.3) / 0.4;
+              room.style.opacity = roomT;
+              const roomScale = 1.2 - roomT * 0.2;
               room.style.transform = `scale(${roomScale}) translateZ(0)`;
             } else {
               room.style.opacity = 1;
@@ -103,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
 
+          // ── Continue or finish ──
           if (t < 1) {
             requestAnimationFrame(tick);
           } else {
@@ -122,31 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(tick);
       });
     }
-  }
-
-  // ── Cubic Bezier easing helper ────────────────────────────
-  function cubicBezier(t, x1, y1, x2, y2) {
-    // Simple approximation using de Casteljau for CSS-style cubic-bezier
-    const cx = 3 * x1;
-    const bx = 3 * (x2 - x1) - cx;
-    const ax = 1 - cx - bx;
-    const cy = 3 * y1;
-    const by = 3 * (y2 - y1) - cy;
-    const ay = 1 - cy - by;
-
-    function sampleX(t) { return ((ax * t + bx) * t + cx) * t; }
-    function sampleY(t) { return ((ay * t + by) * t + cy) * t; }
-
-    // Newton-Raphson to find t for given x
-    let guessT = t;
-    for (let i = 0; i < 8; i++) {
-      const currentX = sampleX(guessT) - t;
-      if (Math.abs(currentX) < 0.001) break;
-      const dx = (3 * ax * guessT + 2 * bx) * guessT + cx;
-      if (Math.abs(dx) < 1e-6) break;
-      guessT -= currentX / dx;
-    }
-    return sampleY(guessT);
   }
 
   // ── Smooth Jazz Synthesizer ───────────────────────────────
